@@ -1,0 +1,81 @@
+version: "3"
+services:
+  app:
+    image: advisor-www
+    container_name: advisor-www
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      - mysql
+      - redis
+    env_file:
+      - .docker.env
+    environment:
+      CONTAINER_ROLE: app
+    volumes:
+    - .:/var/www/html
+    ports:
+      - 8080:80
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  scheduler:
+    image: advisor-www
+    container_name: advisor-scheduler
+    env_file:
+      - .docker.env
+    environment:
+      CONTAINER_ROLE: scheduler
+    volumes:
+    - .:/var/www/html
+    depends_on:
+      - app
+      - mysql
+      - redis
+  queue:
+    image: advisor-www
+    container_name: advisor-queue
+    env_file:
+      - .docker.env
+    environment:
+      CONTAINER_ROLE: queue
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - app
+      - mysql
+      - redis
+  mysql:
+    container_name: advisor-mysql
+    image: mysql:8.0.22
+    volumes:
+    - mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: advisor
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: advisor
+      MYSQL_PASSWORD: password
+    ports:
+      - "13306:3306"
+  testsql:
+    container_name: advisor-testsql
+    image: mysql:8.0.22
+    environment:
+      MYSQL_DATABASE: testadvisor
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: testadvisor
+      MYSQL_PASSWORD: password
+    ports:
+      - "23306:3306"
+  redis:
+    container_name: advisor-redis
+    image: redis:6.0-alpine
+    ports:
+      - 16379:6379
+    volumes:
+      - redis:/data
+volumes:
+  mysql:
+    driver: "local"
+  redis:
+    driver: "local"
