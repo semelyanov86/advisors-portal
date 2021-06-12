@@ -1,177 +1,1485 @@
-openapi: 3.1.0
-info:
-  title: Advisors Portal API
-  version: '1.0'
-  summary: Advisors portal api
-  description: This is description of API for advisors portal
-  contact:
-    name: Sergey Emelyanov
-    url: 'https://sergeyem.ru'
-    email: se@sergeyem.ru
-servers:
-  - url: 'http://127.0.0.1:8080'
-    description: local
-  - url: 'http://advisors.sergeyem.ru'
-    description: prod
-paths:
-  /api/v1/token:
-    post:
-      summary: ''
-      operationId: post-api-v1-token
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                description: ''
-                type: object
-                properties:
-                  token:
-                    type: string
-                    minLength: 1
-                required:
-                  - token
-                x-examples:
-                  example-1:
-                    token: 1|QDOneDC3OmLYdbfcdb8HuUyz5gcrCxlodKtrdDGv
-        '201':
-          description: Created
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                description: ''
-                type: object
-                properties:
-                  errors:
-                    type: array
-                    uniqueItems: true
-                    minItems: 1
-                    items:
-                      required:
-                        - title
-                        - details
-                      properties:
-                        title:
-                          type: string
-                          minLength: 1
-                        details:
-                          type: string
-                          minLength: 1
-                required:
-                  - errors
-                x-examples:
-                  example-1:
-                    errors:
-                      - title: Http Exception
-                        details: Login or password does not math
-        '422':
-          description: Unprocessable Entity (WebDAV)
-          content:
-            application/json:
-              schema:
-                description: ''
-                type: object
-                properties:
-                  errors:
-                    type: array
-                    uniqueItems: true
-                    minItems: 1
-                    items:
-                      required:
-                        - title
-                        - details
-                      properties:
-                        title:
-                          type: string
-                          minLength: 1
-                        details:
-                          type: string
-                          minLength: 1
-                        source:
-                          type: object
-                          properties:
-                            pointer:
-                              type: string
-                              minLength: 1
-                          required:
-                            - pointer
-                required:
-                  - errors
-                x-examples:
-                  example-1:
-                    errors:
-                      - title: Validation Error
-                        details: The email field is required.
-                        source:
-                          pointer: /email
-      description: Getting API token for current user
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: Content-Type
-          description: application/vnd.api+json
-        - schema:
-            type: string
-          in: query
-          name: Accept
-          description: application/vnd.api+json
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties: {}
-        description: "{\n\t\"email\": \"admin@admin.com\",\n\t\"password\": \"password\",\n\t\"device_name\": \"Insomnia\"\n}"
-      tags:
-        - Authentication
-components:
-  schemas:
-    User:
-      title: User
-      type: object
-      description: ''
-      examples:
-        - id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
-      properties:
-        id:
-          type: integer
-          description: Unique identifier for the given user.
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-        dateOfBirth:
-          type: string
-          format: date
-          example: '1997-10-31'
-        emailVerified:
-          type: boolean
-          description: Set to true if the user's email has been verified.
-        createDate:
-          type: string
-          format: date
-          description: The date that the user was created.
-      required:
-        - id
-        - firstName
-        - lastName
-        - email
-        - emailVerified
-  securitySchemes:
-    Bearer:
-      name: 1|QDOneDC3OmLYdbfcdb8HuUyz5gcrCxlodKtrdDGv
-      type: apiKey
-      in: header
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Advisors",
+    "description": "Advisors portal API\n\nThis portal uses JSON:API specification. The first thing you have to look at are the headers sent in your request and responses. As a client, you have to send your request with: Accept: application/vnd.api+json\n\nAND\n\nContent-Type: application/vnd.api+json\n\nThese headers tell the server that what you are sending livews up to protocol given in the JSON:API sapecification, and also that you expect to receive data in the response that adhere to that same protocol.\n\nAs a server, we have to deliver response with:\n\nContent-Type: application/vnd.api+json\n\nStructure of response:\n\ndata - which is the most important member that contains the primary data of the document.\nerrors - which is a member that contains all error objects.\nincluded - which is a member that contains all resource objects that are related to the primary data and/or related to each other.\njsonapi - which is a member that contains the server's implementation of the JSON:API specification.\nmeta - which is a member that conatins all non-standard meta information\nData and errors member never coexist in the same document.\n\nResource object structures in the following way:\n\n{\n  \"id\": 1,\n  \"type\": \"user\",\n  \"attributes\": {},\n  \"relationships\": {}\n}\nIn the root of resource object you can find:\n\nid - which is the id of the resource as a string\ntype - type of resource as a string,\nattributtes - contains all attributes of resource,\nrelationships\nNaming Conventions\nIn this project we are used to working with domains through Eloquent ORM. Domains consist of Models, which define the tables in our database that hold the data for our entire application\n\nOur API will give the client the data being requested and these data are most likely to be fetched from our database. Therefore, it is also very convinient to be thinking of our models as resources.\n\nWe are used to naming our tables after what they represent in the real world and often with nouns. As an example, the data for the users of our application will most likely be stored in a users table with User domain.\n\nAttributes\nThe JSON:API specification specifies that on resource object, the attributes member should be an object. Any member inside this object can be whatever data that represents the object, but must never be a relationship. For relationships, we use a dedicated member in the resource object.",
+    "contact": {
+      "name": "Sergey Emelyanov",
+      "url": "https://sergeyem.ru",
+      "email": "se@sergeyeem.ru"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://advisors.sergeyem.ru",
+      "variables": {
+        "_.BASE_URL": {
+          "default": "DefaultParameterValue",
+          "description": "Default server"
+        }
+      },
+      "description": "prod"
+    },
+    {
+      "url": "http://127.0.0.1:8080",
+      "description": "local"
+    }
+  ],
+  "paths": {
+    "/v1/advisors/4": {
+      "put": {
+        "tags": [
+            "Advisors"
+        ],
+        "summary": "Update Advisor",
+        "description": "Get advisor by it's ID",
+        "operationId": "UpdateAdvisor",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            },
+            "description": "application/vnd.api+json"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "application/vnd.api+json"
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "",
+                "type": "object",
+                "x-examples": {
+                  "example-1": {
+                    "data": {
+                      "type": "advisors",
+                      "id": "4",
+                      "attributes": {
+                        "name": "Ivan Vasilyevich changed",
+                        "price": 542,
+                        "description": "Super bla puper!",
+                        "languages": [
+                            1
+                        ],
+                        "file_upload": "43423fdf"
+                      }
+                    }
+                  }
+                },
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                        "type",
+                        "id",
+                        "attributes"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "price",
+                            "languages"
+                        ],
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "price": {
+                            "type": "number"
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "languages": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          },
+                          "file_upload": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                    "data"
+                ]
+              },
+              "example": {
+                "data": {
+                  "type": "advisors",
+                  "id": "4",
+                  "attributes": {
+                    "name": "Ivan Vasilyevich changed",
+                    "price": 542,
+                    "description": "Super bla puper!",
+                    "languages": [
+                        1
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "description": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "availability": {
+                              "type": "boolean"
+                            },
+                            "price": {
+                              "type": "object",
+                              "properties": {
+                                "amount": {
+                                  "type": "number"
+                                },
+                                "value": {
+                                  "type": "number"
+                                },
+                                "currency": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": [
+                                  "amount",
+                                  "value",
+                                  "currency"
+                              ]
+                            },
+                            "media": {}
+                          },
+                          "required": [
+                              "name",
+                              "description",
+                              "availability",
+                              "price"
+                          ]
+                        },
+                        "meta": {
+                          "type": "object",
+                          "properties": {
+                            "created_at": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                              "created_at",
+                              "updated_at"
+                          ]
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                              "self"
+                          ]
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "languages": {
+                              "type": "object",
+                              "properties": {
+                                "links": {
+                                  "type": "object",
+                                  "properties": {
+                                    "self": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "related": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    }
+                                  },
+                                  "required": [
+                                      "self",
+                                      "related"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                  "links"
+                              ]
+                            }
+                          },
+                          "required": [
+                              "languages"
+                          ]
+                        }
+                      },
+                      "required": [
+                          "type",
+                          "id",
+                          "attributes",
+                          "meta",
+                          "links",
+                          "relationships"
+                      ]
+                    }
+                  },
+                  "required": [
+                      "data"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "data": {
+                        "type": "advisors",
+                        "id": "3",
+                        "attributes": {
+                          "name": "4444",
+                          "description": "Super bla puper!",
+                          "availability": false,
+                          "price": {
+                            "amount": 16875,
+                            "value": 168.75,
+                            "currency": "€"
+                          },
+                          "media": null
+                        },
+                        "meta": {
+                          "created_at": "2021-06-12T17:07:39.000000Z",
+                          "updated_at": "2021-06-12T17:07:39.000000Z"
+                        },
+                        "links": {
+                          "self": "http://127.0.0.1:8080//advisors/3"
+                        },
+                        "relationships": {
+                          "languages": {
+                            "links": {
+                              "self": "http://127.0.0.1:8080//advisors/3/relationships/languages",
+                              "related": "http://127.0.0.1:8080//advisors/3/languages"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "minItems": 1,
+                      "items": {
+                        "required": [
+                            "title",
+                            "details"
+                        ],
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "details": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                      "errors"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "errors": [
+                        {
+                          "title": "Not Found Http Exception",
+                          "details": "No query results for model [App\\Models\\Advisor]."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/advisors": {
+      "post": {
+        "tags": [
+            "Advisors"
+        ],
+        "summary": "Store Advisor",
+        "description": "Create new advisor",
+        "operationId": "StoreAdvisor",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "application/vnd.api+json"
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "",
+                "type": "object",
+                "x-examples": {
+                  "example-1": {
+                    "data": {
+                      "type": "advisors",
+                      "attributes": {
+                        "name": "Second test",
+                        "price": 168.75,
+                        "description": "Super bla puper!",
+                        "languages": [
+                            2
+                        ],
+                        "file_upload": "435ferdgtf"
+                      }
+                    }
+                  }
+                },
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                        "type",
+                        "attributes"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "price",
+                            "languages"
+                        ],
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "price": {
+                            "type": "number"
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "languages": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          },
+                          "file_upload": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                    "data"
+                ]
+              },
+              "example": {
+                "data": {
+                  "type": "advisors",
+                  "attributes": {
+                    "name": "4444",
+                    "price": 168.75,
+                    "description": "Super bla puper!",
+                    "languages": [
+                        1
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "get": {
+        "tags": [
+            "Advisors"
+        ],
+        "summary": "Get All Advisors",
+        "description": "Getting list of advisors",
+        "operationId": "GetAllAdvisors",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "filter[name]",
+            "description": "Filter advisors by name, for example 'Adv'"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "filter[languages]",
+            "description": "Filter advisors by language, for example 1,2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "minItems": 1,
+                      "items": {
+                        "required": [
+                            "type",
+                            "id"
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "description": {
+                                "type": "object",
+                                "properties": {},
+                                "required": []
+                              },
+                              "availability": {
+                                "type": "boolean"
+                              },
+                              "price": {
+                                "type": "object",
+                                "properties": {
+                                  "amount": {
+                                    "type": "number"
+                                  },
+                                  "value": {
+                                    "type": "number"
+                                  },
+                                  "currency": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                    "amount",
+                                    "value",
+                                    "currency"
+                                ]
+                              },
+                              "media": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "number"
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "size": {
+                                    "type": "number"
+                                  },
+                                  "mime_type": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "responsive": {
+                                    "type": "array",
+                                    "items": {
+                                      "required": [],
+                                      "properties": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                    "id",
+                                    "url",
+                                    "size",
+                                    "mime_type",
+                                    "responsive"
+                                ]
+                              }
+                            },
+                            "required": [
+                                "name",
+                                "description",
+                                "availability",
+                                "price",
+                                "media"
+                            ]
+                          },
+                          "meta": {
+                            "type": "object",
+                            "properties": {
+                              "created_at": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "updated_at": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                                "created_at",
+                                "updated_at"
+                            ]
+                          },
+                          "links": {
+                            "type": "object",
+                            "properties": {
+                              "self": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                                "self"
+                            ]
+                          },
+                          "relationships": {
+                            "type": "object",
+                            "properties": {
+                              "languages": {
+                                "type": "object",
+                                "properties": {
+                                  "links": {
+                                    "type": "object",
+                                    "properties": {
+                                      "self": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "related": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      }
+                                    },
+                                    "required": [
+                                        "self",
+                                        "related"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                    "links"
+                                ]
+                              }
+                            },
+                            "required": [
+                                "languages"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "number"
+                            },
+                            "count": {
+                              "type": "number"
+                            },
+                            "per_page": {
+                              "type": "number"
+                            },
+                            "current_page": {
+                              "type": "number"
+                            },
+                            "total_pages": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                              "total",
+                              "count",
+                              "per_page",
+                              "current_page",
+                              "total_pages"
+                          ]
+                        }
+                      },
+                      "required": [
+                          "pagination"
+                      ]
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "self": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "first": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "last": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                          "self",
+                          "first",
+                          "last"
+                      ]
+                    }
+                  },
+                  "required": [
+                      "data",
+                      "meta",
+                      "links"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "data": [
+                        {
+                          "type": "advisors",
+                          "id": "1",
+                          "attributes": {
+                            "name": "Sergey",
+                            "description": {},
+                            "availability": false,
+                            "price": {
+                              "amount": 12400,
+                              "value": 124,
+                              "currency": "€"
+                            },
+                            "media": {
+                              "id": 11,
+                              "url": "http://127.0.0.1:8080//storage/11/60c3d0a9e38023.05017947_2021-06-03_11-56.png",
+                              "size": 113661,
+                              "mime_type": "image/png",
+                              "responsive": []
+                            }
+                          },
+                          "meta": {
+                            "created_at": "2021-06-11T21:14:14.000000Z",
+                            "updated_at": "2021-06-11T21:14:14.000000Z"
+                          },
+                          "links": {
+                            "self": "http://127.0.0.1:8080//advisors/1"
+                          },
+                          "relationships": {
+                            "languages": {
+                              "links": {
+                                "self": "http://127.0.0.1:8080//advisors/1/relationships/languages",
+                                "related": "http://127.0.0.1:8080//advisors/1/languages"
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "pagination": {
+                          "total": 1,
+                          "count": 1,
+                          "per_page": 30,
+                          "current_page": 1,
+                          "total_pages": 1
+                        }
+                      },
+                      "links": {
+                        "self": "http://127.0.0.1:8080/api/v1/advisors?page%5Bnumber%5D=1",
+                        "first": "http://127.0.0.1:8080/api/v1/advisors?page%5Bnumber%5D=1",
+                        "last": "http://127.0.0.1:8080/api/v1/advisors?page%5Bnumber%5D=1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/upload": {
+      "post": {
+        "tags": [
+            "Advisors"
+        ],
+        "summary": "File Upload",
+        "description": "Accepting file ang getting it's ID",
+        "operationId": "FileUpload",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "multipart/form-data"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                    "file_upload"
+                ],
+                "type": "object",
+                "properties": {
+                  "file_upload": {
+                    "type": "string",
+                    "description": "Image for sending to server",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          },
+          "required": false,
+          "description": "Just attach file and send it to server"
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                          "id"
+                      ]
+                    }
+                  },
+                  "required": [
+                      "data"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "data": {
+                        "id": "60c4f4d5239be3.79489814-1623520469"
+                      }
+                    }
+                  }
+                },
+                "example": "{   \"data\": {     \"id\": \"60c4f4d5239be3.79489814-1623520469\"   } }"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/advisors/3": {
+      "get": {
+        "tags": [
+            "Advisors"
+        ],
+        "summary": "Get Advisor By ID",
+        "description": "Get advisor by it's ID",
+        "operationId": "GetAdvisorByID",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "include=languages",
+            "description": "Add related languages"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/languages/1": {
+      "get": {
+        "tags": [
+            "Languages"
+        ],
+        "summary": "Get Language By ID",
+        "description": "",
+        "operationId": "GetLanguageByID",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                              "name"
+                          ]
+                        },
+                        "meta": {
+                          "type": "object",
+                          "properties": {
+                            "created_at": {},
+                            "updated_at": {}
+                          },
+                          "required": []
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                              "self"
+                          ]
+                        }
+                      },
+                      "required": [
+                          "type",
+                          "id",
+                          "attributes",
+                          "meta",
+                          "links"
+                      ]
+                    }
+                  },
+                  "required": [
+                      "data"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "data": {
+                        "type": "languages",
+                        "id": "1",
+                        "attributes": {
+                          "name": "English"
+                        },
+                        "meta": {
+                          "created_at": null,
+                          "updated_at": null
+                        },
+                        "links": {
+                          "self": "http://127.0.0.1:8080//languages/1"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/languages": {
+      "get": {
+        "tags": [
+            "Languages"
+        ],
+        "summary": "Get All Languages",
+        "description": "",
+        "operationId": "GetAllLanguages",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/token": {
+      "post": {
+        "tags": [
+            "Auth"
+        ],
+        "summary": "Get Token",
+        "description": "Getting token for authorizing in server",
+        "operationId": "GetToken",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "application/vnd.api+json",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.api+json"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "description": "application/vnd.api+json"
+          }
+        ],
+        "requestBody": {
+          "description": "Getting token for authorizing future routes",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTokenRequest"
+              },
+              "example": {
+                "email": "{{ _.USERNAME }}",
+                "password": "{{ _.PASSWORD }}",
+                "device_name": "Insomnia"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                      "token"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "token": "2|d7YXqBdDscQpb5yADlK3i4WQeEN2m3ipHDOqjxWD"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "minItems": 1,
+                      "items": {
+                        "required": [
+                            "title",
+                            "details"
+                        ],
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "details": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                      "errors"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "errors": [
+                        {
+                          "title": "Http Exception",
+                          "details": "Login or password does not math"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity (WebDAV)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "minItems": 1,
+                      "items": {
+                        "required": [
+                            "title",
+                            "details"
+                        ],
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "details": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "pointer": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                                "pointer"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                      "errors"
+                  ],
+                  "x-examples": {
+                    "example-1": {
+                      "errors": [
+                        {
+                          "title": "Validation Error",
+                          "details": "The email field is required.",
+                          "source": {
+                            "pointer": "/email"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateAdvisorRequest": {
+        "title": "UpdateAdvisorRequest",
+        "type": "object",
+        "example": {
+          "data": {
+            "type": "advisors",
+            "id": "4",
+            "attributes": {
+              "name": "Ivan Vasilyevich changed",
+              "price": 542,
+              "description": "Super bla puper!",
+              "languages": [
+                  1
+              ]
+            }
+          }
+        },
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+                null
+            ],
+            "properties": {
+              "": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+            "data"
+        ]
+      },
+      "StoreAdvisorRequest": {
+        "title": "StoreAdvisorRequest",
+        "required": [
+            "data"
+        ],
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object"
+          }
+        },
+        "example": {
+          "data": {
+            "type": "advisors",
+            "attributes": {
+              "name": "4444",
+              "price": 168.75,
+              "description": "Super bla puper!",
+              "languages": [
+                  1
+              ]
+            }
+          }
+        }
+      },
+      "GetTokenRequest": {
+        "title": "GetTokenRequest",
+        "required": [
+            "email",
+            "password",
+            "device_name"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "device_name": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "{{ _.USERNAME }}",
+          "password": "{{ _.PASSWORD }}",
+          "device_name": "Insomnia"
+        }
+      }
+    },
+    "securitySchemes": {
+      "httpBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "httpBearer": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Advisors",
+      "description": ""
+    },
+    {
+      "name": "Languages",
+      "description": ""
+    },
+    {
+      "name": "Auth",
+      "description": ""
+    }
+  ]
+}
