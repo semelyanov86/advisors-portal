@@ -18,3 +18,7 @@ Default credentials
 Username: admin@admin.com
 
 Password: password
+
+### Api Documentation
+
+We generated OpenAPI documentation, it is located here: `documentation/openapi.json`
