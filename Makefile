@@ -43,3 +43,11 @@ docker-app-setup:
 	docker-compose run --rm app composer pa db:seed
 	docker-compose run --rm app composer pa key:generate
 	docker-compose run --rm app composer pa storage:link
+
+docker-app-fix:
+	docker-compose run --rm app composer phpcbf
+
+docker-app-check:
+	docker-compose run --rm app composer lint
+	docker-compose run --rm app composer phpcs
+	docker-compose run --rm app composer psalm
