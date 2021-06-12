@@ -42,7 +42,10 @@ final class DescriptionValueObject extends AbstractValueObject
      */
     public function toNative(): ?string
     {
-        return $this->value;
+        if (!$this->value) {
+            return null;
+        }
+        return preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $this->value);
     }
 
     public function __toString(): string

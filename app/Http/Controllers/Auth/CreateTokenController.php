@@ -18,7 +18,7 @@ final class CreateTokenController extends \App\Http\Controllers\Controller
         ]);
 
         if (!$result) {
-            abort(403);
+            abort(403, 'Login or password does not math');
         }
 
         $token = $request->user()->createToken($request->device_name);

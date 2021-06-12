@@ -12,12 +12,15 @@ final class MoneyCast implements \Illuminate\Contracts\Database\Eloquent\CastsAt
 
     /**
      * @inheritDoc
-     * @param int $value
+     * @param int|MoneyValueObject $value
      * @param Model $model
      */
     public function get($model, string $key, $value, array $attributes): MoneyValueObject
     {
-        return MoneyValueObject::fromNative($value);
+        if (is_object($value)) {
+            return $value;
+        }
+        return MoneyValueObject::fromFullNative($value);
     }
 
     /**

@@ -5,6 +5,7 @@
 ### Deployment
 
 * Extract the archive and put it in the folder you want
+* Run docker containers using `make up` command 
 * Run `cp .env.example .env` file to copy example file to `.env`
 * Then edit your .env file with DB credentials and other settings.
 * Run `make setup` command

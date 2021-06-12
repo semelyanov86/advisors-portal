@@ -15,7 +15,7 @@ class CreateAdvisorsTable extends Migration
             $table->string('name')->unique();
             $table->longText('description')->nullable();
             $table->boolean('availability')->default(0)->nullable();
-            $table->decimal('price', 15, 2);
+            $table->integer('price');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -62,7 +62,11 @@
                         <td>
                             @if($advisor->profile)
                                 <a href="{{ $advisor->profile->getUrl() }}" target="_blank" style="display: inline-block">
-                                    <img src="{{ $advisor->profile->getUrl() }}">
+                                    @if (config('app.env') !== 'local' && config('app.env') !== 'testing')
+                                        <img src="{{ $advisor->profile->getUrl('preview') }}">
+                                        @else
+                                        <img width="100px" src="{{ $advisor->profile->getUrl() }}">
+                                    @endif
                                 </a>
                             @endif
                         </td>

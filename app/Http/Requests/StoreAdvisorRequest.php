@@ -38,7 +38,7 @@ final class StoreAdvisorRequest extends FormRequest
                 'integer',
             ],
             'languages' => [
-                'array',
+                'required', 'array', 'min:1'
             ],
         ];
     }

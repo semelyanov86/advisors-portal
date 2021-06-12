@@ -48,19 +48,30 @@ final class Advisor extends Model implements HasMedia
         'deleted_at',
     ];
 
-    /*public function registerMediaConversions(Media $media = null): void
+    public function registerMediaConversions(Media $media = null): void
     {
-        $this->addMediaConversion('thumb')->fit('crop', 120, 120);
-        $this->addMediaConversion('preview')->fit('crop', 800, 800);
-    }*/
+        /** @var string $env */
+        $env = config('app.env');
+        if ($env !== 'local' && $env !== 'testing') {
+            $this->addMediaConversion('thumb')->fit('crop', 120, 120);
+            $this->addMediaConversion('preview')->fit('crop', 800, 800);
+        }
+    }
 
     public function getProfileAttribute()
     {
+        /** @var string $env */
+        $env = config('app.env');
         $file = $this->getMedia('profile')->last();
         if ($file) {
             $file->url       = $file->getUrl();
-            $file->thumbnail = $file->getUrl();
-            $file->preview   = $file->getUrl();
+            if ($env !== 'local' && $env !== 'testing') {
+                $file->thumbnail = $file->getUrl('thumb');
+                $file->preview   = $file->getUrl('preview');
+            } else {
+                $file->thumbnail = $file->getUrl();
+                $file->preview   = $file->getUrl();
+            }
         }
 
         return $file;

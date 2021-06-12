@@ -18,7 +18,7 @@ final class AdvisorTransformer extends \League\Fractal\TransformerAbstract
         return [
             'id' => $advisor->id,
             'name' => $advisor->name,
-            'description' => $advisor->description,
+            'description' => $advisor->description?->toNative(),
             'availability' => $advisor->availability,
             'price' => $advisor->price->toNative(),
             'media' => $image ? $transformer->transform($image) : null,

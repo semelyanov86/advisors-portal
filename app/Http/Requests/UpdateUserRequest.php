@@ -9,12 +9,12 @@ use Illuminate\Http\Response;
 
 class UpdateUserRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return Gate::allows('user_edit');
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => [
@@ -23,7 +23,7 @@ class UpdateUserRequest extends FormRequest
             ],
             'email' => [
                 'required',
-                'unique:users,email,' . request()->route('user')->id,
+                'unique:users,email,' . request()->route('user')?->id,
             ],
             'roles.*' => [
                 'integer',

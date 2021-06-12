@@ -54,9 +54,6 @@ class Handler extends ExceptionHandler
      */
     protected function prepareJsonResponse($request, \Exception | \Throwable $e): \Illuminate\Http\JsonResponse
     {
-        if (config('app.env') === 'local') {
-            return parent::prepareJsonResponse($request, $e);
-        }
         return response()->json([
             'errors' => [
                 [

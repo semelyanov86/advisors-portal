@@ -25,7 +25,7 @@ class AdvisorFactory extends Factory
             'name' => $this->faker->name,
             'description' => DescriptionValueObject::fromNative($this->faker->text),
             'availability' => $this->faker->boolean,
-            'price' => MoneyValueObject::fromNative($this->faker->randomFloat()),
+            'price' => MoneyValueObject::fromFullNative($this->faker->randomNumber()),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];
