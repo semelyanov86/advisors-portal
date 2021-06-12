@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: Advisors Portal API
+  version: '1.0'
+  summary: Advisors portal api
+  description: This is description of API for advisors portal
+  contact:
+    name: Sergey Emelyanov
+    url: 'https://sergeyem.ru'
+    email: se@sergeyem.ru
+servers:
+  - url: 'http://127.0.0.1:8080'
+    description: local
+  - url: 'http://advisors.sergeyem.ru'
+    description: prod
+paths:
+  /api/v1/token:
+    post:
+      summary: ''
+      operationId: post-api-v1-token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  token:
+                    type: string
+                    minLength: 1
+                required:
+                  - token
+                x-examples:
+                  example-1:
+                    token: 1|QDOneDC3OmLYdbfcdb8HuUyz5gcrCxlodKtrdDGv
+        '201':
+          description: Created
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - title
+                        - details
+                      properties:
+                        title:
+                          type: string
+                          minLength: 1
+                        details:
+                          type: string
+                          minLength: 1
+                required:
+                  - errors
+                x-examples:
+                  example-1:
+                    errors:
+                      - title: Http Exception
+                        details: Login or password does not math
+        '422':
+          description: Unprocessable Entity (WebDAV)
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - title
+                        - details
+                      properties:
+                        title:
+                          type: string
+                          minLength: 1
+                        details:
+                          type: string
+                          minLength: 1
+                        source:
+                          type: object
+                          properties:
+                            pointer:
+                              type: string
+                              minLength: 1
+                          required:
+                            - pointer
+                required:
+                  - errors
+                x-examples:
+                  example-1:
+                    errors:
+                      - title: Validation Error
+                        details: The email field is required.
+                        source:
+                          pointer: /email
+      description: Getting API token for current user
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          description: application/vnd.api+json
+        - schema:
+            type: string
+          in: query
+          name: Accept
+          description: application/vnd.api+json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+        description: "{\n\t\"email\": \"admin@admin.com\",\n\t\"password\": \"password\",\n\t\"device_name\": \"Insomnia\"\n}"
+      tags:
+        - Authentication
+components:
+  schemas:
+    User:
+      title: User
+      type: object
+      description: ''
+      examples:
+        - id: 142
+          firstName: Alice
+          lastName: Smith
+          email: alice.smith@gmail.com
+          dateOfBirth: '1997-10-31'
+          emailVerified: true
+          signUpDate: '2019-08-24'
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the given user.
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1997-10-31'
+        emailVerified:
+          type: boolean
+          description: Set to true if the user's email has been verified.
+        createDate:
+          type: string
+          format: date
+          description: The date that the user was created.
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - emailVerified
+  securitySchemes:
+    Bearer:
+      name: 1|QDOneDC3OmLYdbfcdb8HuUyz5gcrCxlodKtrdDGv
+      type: apiKey
+      in: header
